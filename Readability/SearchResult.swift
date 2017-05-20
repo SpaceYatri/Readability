@@ -9,7 +9,6 @@
 import ObjectMapper
 
 class SearchResult: Mappable {
-    var pageInfo: String?
     var resultList: [Result]?
     
     required init?(map: Map){
@@ -17,7 +16,6 @@ class SearchResult: Mappable {
     }
     
     func mapping(map: Map) {
-        pageInfo <- map["pg"]
         resultList <- map["items"]
     }
 }
@@ -25,17 +23,17 @@ class SearchResult: Mappable {
 class Result: Mappable {
     var headline: String?
     var link: String?
-    var newsId: String?
-    var domain: String?
+    var description: String?
+    var displayLink: String?
 
     required init?(map: Map){
         
     }
     
     func mapping(map: Map) {
-        headline <- map["hl"]
-        link <- map["su"]
-        newsId <- map["id"]
-        domain <- map["dm"]
+        headline <- map["title"]
+        link <- map["link"]
+        description <- map["snippet"]
+        displayLink <- map["displayLink"]
     }
 }

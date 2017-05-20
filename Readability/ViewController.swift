@@ -57,10 +57,10 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         let label = UILabel(frame: CGRect(x: 0, y: 0, width: tableView.frame.width - 56, height: CGFloat.greatestFiniteMagnitude))
         label.numberOfLines = 0
         label.lineBreakMode = NSLineBreakMode.byWordWrapping
-        label.font = UIFont(name: "AvenirNext-Medium", size: 13)
+        label.font = UIFont(name: "AvenirNext-Regular", size: 13)
         label.text = resultList[indexPath.row].headline
         label.sizeToFit()
-        return label.frame.height + 24 > 50 ? label.frame.height + 24 : 50
+        return label.frame.height + 75 > 95 ? label.frame.height + 75 : 95
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {

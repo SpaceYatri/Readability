@@ -12,7 +12,7 @@ import AlamofireObjectMapper
 
 class FetchManager: NSObject {
     class func getDataFor(_ str: String, _ completionBlock:@escaping ([Result])->()) {
-        let urlStr = NSString(format: "https://toifeeds.indiatimes.com/feeds/testappsearch.cms?t=n&cleantag=syn&feedtype=sjson&query=%@&tag=relevance&ipver=425", str)
+        let urlStr = NSString(format: "https://www.googleapis.com/customsearch/v1?key=AIzaSyBS4gWNvLWwO2_WBnhAkZB69dADFk4C6ms&cx=012118702810664718029:zw8wtyesfao&q=%@", str)
         guard let url = URL(string: urlStr as String) else {
             return
         }
@@ -26,19 +26,42 @@ class FetchManager: NSObject {
         }
     }
     
-    class func getStoryFor(newsId id: String, _ completionBlock: @escaping (String) -> ()) {
-        let urlStr = NSString(format: "https://toifeeds.indiatimes.com/feeds/testshowfeed.cms?feedtype=sjson&version=v5&tag=news&msid=%@&ipver=425", id)
+    class func getScoreFor(_ urlString: String, _ completionBlock: @escaping (String) -> ()) {
+        guard let encodedString = urlString.addingPercentEncoding(withAllowedCharacters: .alphanumerics) else {
+            completionBlock("?")
+            return
+        }
+        let urlStr = NSString(format: "https://www.webpagefx.com/tools/read-able/check.php?tab=Test+By+Url&uri=%@", encodedString)
         guard let url = URL(string: urlStr as String) else {
             return
         }
-        Alamofire.request(url).responseJSON { response in
-            if let JSON = response.result.value as? Dictionary<String, Any> {
-                if let item = JSON["it"] as? Dictionary<String, Any> {
-                    if let story = item["Story"] as? String {
-                        completionBlock(story)
-                    }
+        Alamofire.request(url).responseData { (response) in
+            guard let value = response.value else {
+                return
+            }
+            DispatchQueue.global(qos: .background).async {
+                let str = String(data: value, encoding: String.Encoding.utf8)
+                let score = parseHtmlForScore(str)
+                DispatchQueue.main.async {
+                    completionBlock(score)
                 }
             }
         }
+    }
+    
+    class func parseHtmlForScore(_ aRawHTML: String?) -> String {
+        guard let rawHTML = aRawHTML else {
+            return "?"
+        }
+        var filteredHTML = rawHTML.replacingOccurrences(of: " ", with: "")
+        filteredHTML = filteredHTML.replacingOccurrences(of: "\n", with: "")
+        if let range1 = filteredHTML.range(of: "<th>AutomatedReadabilityIndex</th><td>") {
+            filteredHTML = filteredHTML.substring(from: range1.upperBound)
+            if let range2 = filteredHTML.range(of: "</td>") {
+                filteredHTML = filteredHTML.substring(to: range2.lowerBound)
+                return filteredHTML
+            }
+        }
+        return "?"
     }
 }
